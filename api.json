@@ -1,0 +1,99 @@
+{
+  "name": "DJ Championship",
+  "dnsNames": [
+    "api.djchampionship.com"
+  ],
+  "policies": {
+    "inbound": [
+    ],
+    "backend": [
+    ],
+    "outbound": [
+    ],
+    "error": [
+    ]
+  },
+  
+  "properties": [
+
+  ],
+  
+  "services": {
+    "identity": {
+      "hostname": "dj_identity"
+    },
+    "account": {
+      "hostname": [
+        "dj_account_1",
+        "dj_account_2"
+      ]
+    }
+  },
+
+  "operations": [
+    {
+      "match": {
+        "route": "/"
+      },
+      "policies": {
+        "inbound": [
+        ],
+        "outbound": [
+          "hydra"
+        ]
+      }
+    },
+    {
+      "match": {
+        "route": "/connect/token"
+      },
+      "policies": {
+        "backend": [
+          {
+            "name": "forward",
+            "service": "identity"
+          }
+        ]
+      }
+    },
+    {
+      "match": [
+        {
+          "route": "/accounts/{userName}",
+          "verb": "GET"
+        },
+        {
+          "route": "/accounts",
+          "verb": "POST"
+        }
+      ],
+      "policies": {
+        "inbound": [
+          "validJwtToken"
+        ],
+        "backend": [
+          {
+            "policy": "forward",
+            "service": "account"
+          }
+        ],
+        "outbound": [
+          "hydra"
+        ]
+      }
+    }
+  ],
+
+  "hydra": [
+    {
+      "match": [
+        {
+          "contentType": "application/vnd.djchampionship.entrypoint+json;version=1"
+        }
+      ],
+      "@context": {},
+      "@id": {},
+      "@type": "dj:Entrypoint"
+    }
+  ]
+}
